@@ -1,0 +1,72 @@
+openapi: 3.0.0
+info:
+  title: Weather API
+  version: 1.0.0
+  description: API to fetch weather statistics data with pagination support.
+paths:
+  /api/weather/stats:
+    get:
+      summary: Get paginated weather statistics
+      description: Retrieve weather statistics with pagination. You can filter the data by page and the number of records per page.
+      parameters:
+        - name: page
+          in: query
+          description: Page number to retrieve.
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          description: Number of records per page.
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: A paginated list of weather statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                    description: The current page number.
+                  per_page:
+                    type: integer
+                    description: The number of records per page.
+                  total:
+                    type: integer
+                    description: The total number of records.
+                  total_pages:
+                    type: integer
+                    description: The total number of pages based on the `per_page` value.
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        station_id:
+                          type: string
+                          description: The unique ID of the weather station.
+                        year:
+                          type: integer
+                          description: The year of the statistics.
+                        avg_max_temp_celsius:
+                          type: number
+                          format: float
+                          description: The average maximum temperature in Celsius for the year.
+                        avg_min_temp_celsius:
+                          type: number
+                          format: float
+                          description: The average minimum temperature in Celsius for the year.
+                        total_precipitation_cm:
+                          type: number
+                          format: float
+                          description: The total accumulated precipitation in centimeters for the year.
+        '400':
+          description: Bad Request. Missing or invalid parameters.
+        '500':
+          description: Internal Server Error. Something went wrong on the server.
