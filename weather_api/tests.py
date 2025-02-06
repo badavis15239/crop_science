@@ -1,32 +1,47 @@
 import unittest
-from app import app, db
-from models import WeatherRecord, WeatherStats
+from app import app, db, WeatherRecord, WeatherStats
 
-class WeatherApiTestCase(unittest.TestCase):
+class WeatherApiTests(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        cls.client = app.test_client()
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:admin@localhost:5432/data'
+        """Setup database configuration before tests"""
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:admin@0.0.0.0/data'  # Replace with your DB URI
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        db.init_app(app)
-
+        # We don't need to call db.init_app(app) again since it's already done in app.py
+    
     def setUp(self):
-        with app.app_context():
-            db.create_all()
+        """Setup the test client for each test"""
+        # Create a new app instance for testing
+        with app.app_context():  # Use application context
+            db.create_all()  # Ensure the tables are created for testing
+
+        # Initialize the test client
+        self.client = app.test_client()
 
     def tearDown(self):
+        """Clean up after each test"""
         with app.app_context():
             db.session.remove()
-            db.drop_all()
+            db.drop_all()  # Drop all tables after each test to keep the tests isolated
 
-    def test_get_weather(self):
-        response = self.client.get('/api/weather?page=1&per_page=2')
+    def test_weather(self):
+        response = self.client.get('/api/weather?page=1&per_page=10')
         self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertIn('data', data)
+        self.assertIn('page', data)
+        self.assertIn('per_page', data)
+        self.assertIn('total', data)
 
-    def test_get_weather_stats(self):
-        response = self.client.get('/api/weather/stats?page=1&per_page=2')
+    def test_weather_stats(self):
+        response = self.client.get('/api/weather/stats?page=1&per_page=10')
         self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertIn('data', data)
+        self.assertIn('page', data)
+        self.assertIn('per_page', data)
+        self.assertIn('total', data)
 
 if __name__ == '__main__':
     unittest.main()

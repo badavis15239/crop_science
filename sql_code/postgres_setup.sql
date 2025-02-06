@@ -27,3 +27,22 @@ CREATE TABLE IF NOT EXISTS data_c.weather_statistics (
     total_precipitation_cm NUMERIC(7,2),
     PRIMARY KEY (station_id, year)
 );
+
+
+
+to do
+
+1.  automate schema and user creation when dockercompose up happens
+2.  sql connection os.getenv
+3.  create user for api_user
+4.  ingestion -- swap schemas for ingestion, ingest, swap schema for api
+6.  aws instructions for deployment (include ecs, eks and this should be an apigateway/lambda)
+7.  dockerfile for api -- add to docker compose
+
+Things I want to improve but ran out of time
+
+1. mock tests and more unittests 
+2. use the escape module to prevent sql injections
+3.  Restritctions on the size of pages
+4.  add additional parameters so people can queyr by year, weather station or both
+5.  May be better to make a view out of the stats data 
