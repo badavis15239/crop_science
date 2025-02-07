@@ -2,7 +2,7 @@ create schema data_a;
 create schema data_b;
 create schema data_c;
 
-ALTER ROLE api_user SET search_path TO data_a, data_c; 
+ALTER ROLE admin SET search_path TO data_a, data_c; 
 
 CREATE USER api_user WITH PASSWORD 'api_user';
 GRANT USAGE ON SCHEMA data_a, data_b, data_c TO api_user;
@@ -27,13 +27,3 @@ CREATE TABLE IF NOT EXISTS data_c.weather_statistics (
     total_precipitation_cm NUMERIC(7,2),
     PRIMARY KEY (station_id, year)
 );
-
-
-
--- Things I want to improve but ran out of time
-
--- 1. mock tests and more unittests 
--- 2. use the escape module to prevent sql injections
--- 3.  Restritctions on the size of pages
--- 4.  add additional parameters so people can queyr by year, weather station or both
--- 5.  May be better to make a view out of the stats data 

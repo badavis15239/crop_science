@@ -67,10 +67,15 @@ cursor.execute("SHOW search_path;")
 
 # Fetch the result
 current_search_path = cursor.fetchone()
-if current_search_path[0] == 'data_a':
-    cursor.execute("ALTER ROLE admin SET search_path TO data_b;")
-elif current_search_path[0] == 'data_b':
-    cursor.execute("ALTER ROLE admin SET search_path TO data_a;")
+import pdb; pdb.set_trace()
+if current_search_path[0] == 'data_a, data_c':
+    cursor.execute("ALTER ROLE admin SET search_path TO data_b, data_c;")
+    live_schema = 'data_b'
+    cursor.execute("SET search_path TO data_b, data_c;")  
+elif current_search_path[0] == 'data_b, data_c':
+    cursor.execute("ALTER ROLE admin SET search_path TO data_a, data_c;")
+    live_schema = 'data_a'
+    cursor.execute("SET search_path TO data_a, data_c;")  
 else:
     logging.error(f'Search path = {current_search_path}')
 conn.commit()
@@ -117,13 +122,9 @@ the data will fail to load because the there is a primary key constraint on stat
 """
 
 ## Swap live schema for api user so seemlessly changes the data source and no down time for api on data loads
-if current_search_path[0] == '"$user", public':
-    cursor.execute(f"ALTER ROLE api_user SET search_path TO data_a, data_c;")
-elif current_search_path[0] == 'data_a':
-    cursor.execute(f"ALTER ROLE api_user SET search_path TO data_b, data_c;")
-elif current_search_path[0] == 'data_b':
-    cursor.execute(f"ALTER ROLE api_user SET search_path TO data_a, data_c;")
-else:
-    logging.error(f'Search path = {current_search_path}')
+cursor.execute(f"ALTER ROLE api_user SET search_path TO {live_schema}, data_c;")
 
 conn.commit()
+
+cursor.close()
+conn.close()
