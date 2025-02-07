@@ -32,8 +32,9 @@ http://0.0.0.0:5000/api/weather/stats?page=1&per_page=100
 
 http://0.0.0.0:5000/api/weather?page=1&per_page=10
 
-##  Assume you are asked to get your code running in the cloud using AWS. What tools and AWS services would you use to deploy the API, database, and a scheduled version of your data ingestion code? Write up a description of your approach.
+####  Assume you are asked to get your code running in the cloud using AWS. What tools and AWS services would you use to deploy the API, database, and a scheduled version of your data ingestion code? Write up a description of your approach.
 
+````
 There are many tools I could use for data ingestion:
 	- Airflow -- schedule the tasks and run them pulling data from s3 buckets
 	- Lambdas can be set to cron tasks however, there is a 15 minute timeout that could limit larger datasets
@@ -62,4 +63,5 @@ CICD --
 	- Github actions (runner could be self hosted on ECS or EKS)
 	- again -- pick your poison.  I have worked with all of these.
 
-	
+```
+
