@@ -9,23 +9,17 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 def connect_db():
     # PostgreSQL Connection
     DB_CONFIG = {
-        "dbname": "data",
-        "user": "admin",
-        "password": "admin",
-        "host": "localhost",
-        "port": "5432"
+        "dbname": os.getenv('DATABASE'),
+        "user": os.getenv('ADMIN_USER'),
+        "password": os.getenv('ADMIN_PASSWORD'),
+        "host": os.getenv('HOST'),
+        "port": os.getenv('PORT')
     }
 
     conn = psycopg2.connect(**DB_CONFIG)
     cursor = conn.cursor()
     return conn, cursor
 
-# def create_query(query):
-#     # Create Staging Table (Temporary for Fast Bulk Load)
-#     staging_table_query = """
-    
-#     """
-#     return staging_table_query
 
 # Function to Process and Load Each File
 def process_file(file_path, conn, cursor):
@@ -73,7 +67,6 @@ cursor.execute("SHOW search_path;")
 
 # Fetch the result
 current_search_path = cursor.fetchone()
-import pdb; pdb.set_trace()
 if current_search_path[0] == 'data_a':
     cursor.execute("ALTER ROLE admin SET search_path TO data_b;")
 elif current_search_path[0] == 'data_b':
@@ -101,20 +94,34 @@ for file_name in os.listdir(folder_path):
 
 logging.info("Data loaded")
 
-##### last steps -- dedup and swap schema to read from schema where the data was loaded
+logging.info("Create constraints to ensure no dupes and create indexes")
 
-# # Deduplicate and Move Data to Final Table
-# deduplication_query = """
-# INSERT INTO weather_records (station_id, record_date, max_temp, min_temp, precipitation)
-# SELECT DISTINCT station_id, record_date, max_temp, min_temp, precipitation
-# FROM weather_records
-# ON CONFLICT (station_id, record_date) DO NOTHING;
-# """
-# cursor.execute(deduplication_query)
-# conn.commit()
-# logging.info("✅ Deduplication completed.")
+cursor.execute("ALTER TABLE weather_records DROP CONSTRAINT IF EXISTS weather_records_pkey CASCADE; \
+    ALTER TABLE weather_records ADD CONSTRAINT weather_records_pkey PRIMARY KEY (station_id, record_date);")
 
-# # Close Connection
-# cursor.close()
-# conn.close()
-# logging.info("✅ All operations completed successfully!")
+conn.commit()
+
+logging.info("Constraints and indexes complete")
+
+"""
+If you want, you can create indexes but they aren't needed since we aren't querying specific 
+attributes in the table such as date or temps etc.  Indexes and constraints are created after
+data is loaded to allow for speed of loading.  If any failures occur in the constraints/index 
+creation, then the schema never switches and the api user keeps using the old schema until the data
+ingestion issues are resolved.
+"""
+
+"""
+You could add a deduplicaton step here to ensure that there aren't any duplicate records.  However,
+the data will fail to load because the there is a primary key constraint on station_id, and record_date
+"""
+
+## Swap live schema for api user so seemlessly changes the data source and no down time for api on data loads
+if current_search_path[0] == 'data_a':
+    cursor.execute(f"ALTER ROLE api_user SET search_path TO data_b, data_c;")
+elif current_search_path[0] == 'data_b':
+    cursor.execute(f"ALTER ROLE api_user SET search_path TO data_a, data_c;")
+else:
+    logging.error(f'Search path = {current_search_path}')
+
+conn.commit()

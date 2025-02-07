@@ -1,12 +1,13 @@
+import os
 import psycopg2
 
 # Database connection details
 DB_CONFIG = {
-    "dbname": "data",
-    "user": "admin",
-    "password": "admin",
-    "host": "localhost",
-    "port": "5432"
+    "dbname": os.getenv('DATABASE'),
+    "user": os.getenv('ADMIN_USER'),
+    "password": os.getenv('ADMIN_PASSWORD'),
+    "host": os.getenv('HOST'),
+    "port": os.getenv('PORT')
 }
 
 def calculate_and_store_weather_statistics():

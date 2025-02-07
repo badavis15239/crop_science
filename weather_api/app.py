@@ -2,11 +2,20 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Api, Resource, fields
 from models import db, WeatherRecord, WeatherStats
+import os
 import yaml
 
 # Initialize Flask app and API
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:admin@0.0.0.0/data'  # Replace with your DB URI
+
+# Set env variables
+USERNAME = os.getenv('API_USER')
+PASSWORD = os.getenv('API_PASSWORD')
+HOST = os.getenv('HOST')
+DATABASE = os.getenv('DATABASE')
+PORT = os.getenv('PORT')
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{USERNAME}:{PASSWORD}@{HOST}/{DATABASE}'  # Replace with your DB URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 api = Api(app, doc='/swagger')

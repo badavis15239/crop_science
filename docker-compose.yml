@@ -11,3 +11,19 @@ services:
       - "5432:5432"
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
+      - ./sql_code:/docker-entrypoint-initdb.d
+
+  flask-app:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Assuming the Dockerfile is in the same directory as this docker-compose.yml
+    ports:
+      - "5000:5000"  # Expose the Flask app on port 5000
+    environment:
+      FLASK_APP: app.py  # Adjust if your Flask app entrypoint is different
+      FLASK_RUN_HOST: 0.0.0.0  # Listen on all network interfaces inside the container
+      FLASK_ENV: development  # Or "development" if you want to run in dev mode
+    volumes:
+      - ./weather_api:/app  # Mount your project directory into the container to reflect changes in real time
+    env_file:
+      - .env  # Loads environment variables from the .env file
