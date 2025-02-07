@@ -6,7 +6,7 @@ DB_CONFIG = {
     "dbname": os.getenv('DATABASE'),
     "user": os.getenv('ADMIN_USER'),
     "password": os.getenv('ADMIN_PASSWORD'),
-    "host": os.getenv('HOST'),
+    "host": os.getenv('INGESTION_HOST'),
     "port": os.getenv('PORT')
 }
 

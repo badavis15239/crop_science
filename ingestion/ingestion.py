@@ -12,7 +12,7 @@ def connect_db():
         "dbname": os.getenv('DATABASE'),
         "user": os.getenv('ADMIN_USER'),
         "password": os.getenv('ADMIN_PASSWORD'),
-        "host": os.getenv('HOST'),
+        "host": os.getenv('INGESTION_HOST'),
         "port": os.getenv('PORT')
     }
 
@@ -96,10 +96,10 @@ logging.info("Data loaded")
 
 logging.info("Create constraints to ensure no dupes and create indexes")
 
-cursor.execute("ALTER TABLE weather_records DROP CONSTRAINT IF EXISTS weather_records_pkey CASCADE; \
-    ALTER TABLE weather_records ADD CONSTRAINT weather_records_pkey PRIMARY KEY (station_id, record_date);")
+# cursor.execute("ALTER TABLE weather_records DROP CONSTRAINT IF EXISTS weather_records_pkey CASCADE; \
+#     ALTER TABLE weather_records ADD CONSTRAINT weather_records_pkey PRIMARY KEY (station_id, record_date);")
 
-conn.commit()
+# conn.commit()
 
 logging.info("Constraints and indexes complete")
 
@@ -117,7 +117,9 @@ the data will fail to load because the there is a primary key constraint on stat
 """
 
 ## Swap live schema for api user so seemlessly changes the data source and no down time for api on data loads
-if current_search_path[0] == 'data_a':
+if current_search_path[0] == '"$user", public':
+    cursor.execute(f"ALTER ROLE api_user SET search_path TO data_a, data_c;")
+elif current_search_path[0] == 'data_a':
     cursor.execute(f"ALTER ROLE api_user SET search_path TO data_b, data_c;")
 elif current_search_path[0] == 'data_b':
     cursor.execute(f"ALTER ROLE api_user SET search_path TO data_a, data_c;")

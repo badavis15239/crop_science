@@ -2,6 +2,8 @@ create schema data_a;
 create schema data_b;
 create schema data_c;
 
+ALTER ROLE api_user SET search_path TO data_a, data_c; 
+
 CREATE USER api_user WITH PASSWORD 'api_user';
 GRANT USAGE ON SCHEMA data_a, data_b, data_c TO api_user;
 GRANT SELECT ON ALL TABLES IN SCHEMA data_a, data_b, data_c TO api_user;
